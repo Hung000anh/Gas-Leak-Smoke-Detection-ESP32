@@ -42,7 +42,7 @@ void sendSensorData() {
   Blynk.virtualWrite(V2, lux);  // Lux
 
   // Điều kiện phát hiện cháy: nhiệt độ cao và ánh sáng mạnh
-  if (temp > 70 && lux > 1500) {
+  if (temp > 70 && lux > 10000) {
     digitalWrite(RELAY_PIN, HIGH);
     Serial.println("🔥 Cảnh báo cháy! Buzzer ON");
   } else {
