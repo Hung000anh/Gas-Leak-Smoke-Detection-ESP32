@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "author": "Hùng Anh Nguyễn",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": -19.2, "left": -167.96, "attrs": {} },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht1",
+      "top": -47.7,
+      "left": -283.8,
+      "attrs": { "temperature": "21.4", "humidity": "61" }
+    },
+    {
+      "type": "wokwi-buzzer",
+      "id": "bz1",
+      "top": 60,
+      "left": -36.6,
+      "attrs": { "volume": "0.1" }
+    },
+    {
+      "type": "wokwi-photoresistor-sensor",
+      "id": "ldr1",
+      "top": -9.9,
+      "left": -437.5,
+      "rotate": 90,
+      "attrs": {}
+    },
+    { "type": "wokwi-relay-module", "id": "relay1", "top": -9.4, "left": -38.4, "attrs": {} }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "dht1:VCC", "esp:5V", "red", [ "v96", "h86.4", "v19.2" ] ],
+    [ "ldr1:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "dht1:GND", "esp:GND.1", "black", [ "v19.2", "h9.6", "v48" ] ],
+    [ "esp:GND.2", "relay1:GND", "black", [ "v0", "h9.6", "v9.6" ] ],
+    [ "esp:22", "relay1:IN", "green", [ "h0" ] ],
+    [ "relay1:NO", "bz1:2", "green", [ "h30", "v123", "h-105.6" ] ],
+    [ "esp:5V", "relay1:COM", "red", [ "h0.15", "v19.2", "h278.4", "v-182.4" ] ],
+    [ "esp:GND.2", "bz1:1", "black", [ "v0", "h9.6", "v144", "h48" ] ],
+    [ "esp:5V", "relay1:VCC", "red", [ "h0.15", "v28.8", "h115.2", "v-201.6" ] ],
+    [ "ldr1:AO", "esp:34", "green", [ "v38.4", "h163.9", "v-96" ] ],
+    [ "dht1:SDA", "esp:12", "green", [ "v0" ] ],
+    [ "esp:3V3", "ldr1:VCC", "red", [ "h-28.65", "v172.8", "h-144" ] ]
+  ],
+  "dependencies": {}
+}
