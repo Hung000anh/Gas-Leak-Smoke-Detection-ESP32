@@ -71,5 +71,12 @@ Photos of the real hardware setup are shown below.
 * 📟 **Live display** on LCD1602
 * 🔊 **Buzzer alert** for critical readings
 
+---
 
+## 📲 Blynk Integration
+![Blynk Result](screenshots/blynk-result.jpg)
 
+---
+
+## 📬 Telegram Bot Alerts
+![Telegram Result](screenshots/telegram-alert.jpg)
