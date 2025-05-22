@@ -1,69 +1,142 @@
+//  Blynk
 #define BLYNK_TEMPLATE_ID "TMPL6-UMMO4k4"
 #define BLYNK_TEMPLATE_NAME "GasLeakSmokeDetection"
-#define BLYNK_AUTH_TOKEN "AJ8dti2HSmJs-akLFPOIM_AeXi6JMyZ6"
+#define BLYNK_AUTH_TOKEN "ii3qw-JuyMzDZ-PussbZIbXWNSwSkUo8"
 
-#define DHTPIN 12       // Chân kết nối cảm biến DHT22
-#define DHTTYPE DHT22
-#define LDR_PIN 34      // Chân analog output của LDR
-#define RELAY_PIN 22    // Chân điều khiển relay
-
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
 #include <DHT.h>
 #include <WiFi.h>
-#include <WiFiClient.h>
+#include <WiFiClientSecure.h>
+#include <UniversalTelegramBot.h>
 #include <BlynkSimpleEsp32.h>
 
+
+// WiFi Credentials
+char ssid[] = "Wokwi-GUEST";
+char pass[] = "";
+char auth[] = BLYNK_AUTH_TOKEN;
+
+// Cấu hình cảm biến DHT22
+#define DHTPIN 4
+#define DHTTYPE DHT22
 DHT dht(DHTPIN, DHTTYPE);
-BlynkTimer timer;
 
-// WiFi credentials
-char ssid[] = "Wokwi-GUEST";  // Hoặc WiFi nhà bạn
-char pass[] = "";             // Mật khẩu WiFi
+// Cảm biến khí gas
+#define GAS_PIN 33 //MQ2
 
-void sendSensorData() {
-  float temp = dht.readTemperature();
-  float humi = dht.readHumidity();
+// Cảm biến ánh sáng
+#define LDR1_PIN 34 // LDR
+#define FLAME_PIN 32 //On realtime i change ldr2 to ky026
 
-  // Tính lux từ LDR
-  const float GAMMA = 0.7;
-  const float RL10 = 50;
-  int analogValue = analogRead(LDR_PIN);
-  float voltage = analogValue / 4095.0 * 3.3;
-  float resistance = 2000 * voltage / (1 - voltage / 5);
-  float lux = pow(RL10 * 1e3 * pow(10, GAMMA) / resistance, (1 / GAMMA));
+// Buzzer
+#define BUZZER_PIN 27
 
-  // In ra Serial
-  Serial.print("Nhiet do: "); Serial.print(temp);
-  Serial.print(" *C, Do am: "); Serial.print(humi);
-  Serial.print(" %, Anh sang: "); Serial.println(lux);
+// Khởi tạo LCD I2C (địa chỉ 0x27)
+#define SDA 25
+#define SCL 26
 
-  // Gửi lên Blynk
-  Blynk.virtualWrite(V0, humi); // Humidity
-  Blynk.virtualWrite(V1, temp); // Temperature
-  Blynk.virtualWrite(V2, lux);  // Lux
 
-  // Điều kiện phát hiện cháy: nhiệt độ cao và ánh sáng mạnh
-  if (temp > 70 && lux > 10000) {
-    digitalWrite(RELAY_PIN, HIGH);
-    Serial.println("🔥 Cảnh báo cháy! Buzzer ON");
-  } else {
-    digitalWrite(RELAY_PIN, LOW);
-    Serial.println("✅ Bình thường. Buzzer OFF");
-  }
-}
+  
+#define BOTtoken "8034300471:AAEZn8Fn6AJKrLGxKwikcKpS4Mvu_upMb14"
+#define CHAT_ID "6673024895"
+WiFiClientSecure client;
+UniversalTelegramBot bot(BOTtoken, client);
+
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
+  // Kết nối WiFi
   Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
 
+  // Khởi tạo cảm biến
   dht.begin();
-  pinMode(LDR_PIN, INPUT);
-  pinMode(RELAY_PIN, OUTPUT);
-  digitalWrite(RELAY_PIN, LOW); // Tắt buzzer ban đầu
+  
+  // Cấu hình chân vào/ra
+  pinMode(GAS_PIN, INPUT);
+  pinMode(LDR1_PIN, INPUT);
+  pinMode(FLAME_PIN, INPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
 
-  timer.setInterval(1000L, sendSensorData);
+  // Khởi động LCD
+  Wire.begin(SDA, SCL);
+  lcd.init();
+  lcd.backlight();
+
+  // Hiển thị khởi động
+  lcd.setCursor(0, 0);
+  lcd.print("ESP32 Sensor Hub");
+  delay(2000);
+  lcd.clear();
 }
 
 void loop() {
-  Blynk.run();
-  timer.run();
+    float temperature = dht.readTemperature();
+    float humidity = dht.readHumidity();
+    int gasLevel = analogRead(GAS_PIN);
+    int ldr1Value = analogRead(LDR1_PIN);
+    int flameValue = analogRead(FLAME_PIN);
+    
+    // These constants should match the photoresistor's "gamma" and "rl10" attributes
+  const float GAMMA = 0.7;
+  const float RL10 = 50;
+  float voltage = ldr1Value / 4095.0 * 3.3;
+  float resistance = 2000 * voltage / (1 - voltage / 5);
+  float lux = pow(RL10 * 1e3 * pow(10, GAMMA) / resistance, (1 / GAMMA));
+
+
+    // Hiển thị lên Serial
+    Serial.print("Nhiet do: "); Serial.print(temperature); Serial.println(" *C");
+    Serial.print("Do am: "); Serial.print(humidity); Serial.println(" %");
+    Serial.print("Gas: "); Serial.println(gasLevel); Serial.println(" PPM");
+    Serial.print("Lux: "); Serial.println(lux); Serial.println(" LX");
+    Serial.print("Flame level: "); Serial.println(flameValue); Serial.println(" NM");
+    Serial.println("--------------------");
+
+    // Hiển thị LCD
+    lcd.setCursor(0, 0);
+    lcd.print("T:"); lcd.print(temperature, 1); lcd.print("C ");
+    lcd.print("H:"); lcd.print(humidity, 0); lcd.print("%");
+
+    Blynk.run();
+
+
+    Serial.print("T: "); Serial.print(temperature, 1);
+    Serial.print("°C | H: "); Serial.print(humidity, 1);
+    Serial.print(" % | Gas: "); Serial.print(gasLevel);
+    Serial.print(" | LUX: "); Serial.print(lux);
+    Serial.print(" | Flame: "); Serial.println(flameValue);
+
+    Blynk.virtualWrite(V0, temperature);
+    Blynk.virtualWrite(V1, humidity);
+    Blynk.virtualWrite(V2, gasLevel);
+    Blynk.virtualWrite(V3, lux);
+    Blynk.virtualWrite(V4, flameValue);
+
+    if (flameValue > 2000 || gasLevel > 2000 || lux > 10000) {
+        Serial.println("WARNING: FIRE/GAS DETECTED!");
+
+        for (int i = 0; i < 3; i++) {
+            digitalWrite(BUZZER_PIN, HIGH);
+            delay(300);
+            digitalWrite(BUZZER_PIN, LOW);
+            delay(300);
+        }
+
+        String alertMessage = "WARNING! FIRE/GAS DETECTED!\n";
+        alertMessage += "Temperature: " + String(temperature, 1) + "°C\n";
+        alertMessage += "Humidity: " + String(humidity, 1) + "%\n";
+        alertMessage += "Gas Level: " + String(gasLevel) + "\n";
+        alertMessage += "Flame Intensity: " + String(flameValue) + "\n";
+        bot.sendMessage(CHAT_ID, alertMessage);
+
+        Blynk.virtualWrite(V5, HIGH);
+    } else {
+        Blynk.virtualWrite(V5, LOW);
+    }
+
+    delay(2000);
 }
+
