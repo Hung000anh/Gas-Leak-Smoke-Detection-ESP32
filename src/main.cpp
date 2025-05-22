@@ -50,7 +50,8 @@ void setup() {
   Serial.begin(9600);
   // Kết nối WiFi
   Blynk.begin(BLYNK_AUTH_TOKEN, ssid, pass);
-
+  // Kết nối đến Telegram
+  client.setCACert(TELEGRAM_CERTIFICATE_ROOT);
   // Khởi tạo cảm biến
   dht.begin();
   
@@ -70,6 +71,9 @@ void setup() {
   lcd.print("ESP32 Sensor Hub");
   delay(2000);
   lcd.clear();
+
+  bot.sendMessage(CHAT_ID, "System Online! Monitoring Fire & Gas Hazards");
+
 }
 
 void loop() {
@@ -115,7 +119,11 @@ void loop() {
     Blynk.virtualWrite(V3, lux);
     Blynk.virtualWrite(V4, flameValue);
 
-    if (flameValue > 2000 || gasLevel > 2000 || lux > 10000) {
+    bool isFlameDetected = flameValue < 1000;  // giá trị thấp = phát hiện lửa
+    bool isGasDetected = gasLevel > 1500;      // ngưỡng khí gas cao
+    bool isBrightSuddenly = lux > 12000 && gasLevel > 1000;  // ánh sáng mạnh bất thường + có gas
+
+    if (isFlameDetected || isGasDetected || isBrightSuddenly) {
         Serial.println("WARNING: FIRE/GAS DETECTED!");
 
         for (int i = 0; i < 3; i++) {
@@ -136,6 +144,7 @@ void loop() {
     } else {
         Blynk.virtualWrite(V5, LOW);
     }
+        
 
     delay(2000);
 }
