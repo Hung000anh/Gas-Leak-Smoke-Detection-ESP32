@@ -74,7 +74,7 @@ Photos of the real hardware setup are shown below.
 ---
 
 ## 📲 Blynk Integration
-![Blynk Result](screenshots/blynk-result.jpg)
+![Blynk Result](screenshots/blynk_result.png)
 
 ---
 
