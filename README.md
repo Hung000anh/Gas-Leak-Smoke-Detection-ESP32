@@ -6,9 +6,9 @@ This repository contains a project for a gas leak detection system and smoke/fir
 | **Component**          | **VCC** | **GND** | **Signal Pin(s)**            |
 | ---------------------- | ------- | ------- | ---------------------------- |
 | DHT22 (Temp & Humid)   | 5V      | GND     | GPIO 4 (Data)                |
-| Gas Sensor (DOUT)      | 5V      | GND     | GPIO 33 (Digital Out)        |
-| LDR 1 (Photoresistor)  | 5V      | GND     | GPIO 34 (DO)                 |
-| LDR 2 (Photoresistor)  | 5V      | GND     | GPIO 32 (DO)                 |
+| Gas Sensor (DOUT)      | 5V      | GND     | GPIO 33 (AO)        |
+| LDR 1 (Photoresistor)  | 5V      | GND     | GPIO 34 (AO)                 |
+| LDR 2 (Photoresistor)  | 5V      | GND     | GPIO 32 (AO)                 |
 | LCD1602 (I2C)          | 5V      | GND     | GPIO 25 (SDA), GPIO 26 (SCL) |
 | Buzzer (Active)        | —       | GND     | GPIO 27 (Positive terminal)  |
 | ESP32 ↔ Serial Monitor | —       | —       | TX → RX, RX → TX             |
@@ -53,9 +53,9 @@ Photos of the real hardware setup are shown below.
 | **Component**           | **VCC** | **GND** | **Signal Pin(s)**            |
 | ----------------------- | ------- | ------- | ---------------------------- |
 | DHT22 (Temp & Humidity) | 5V      | GND     | GPIO 4 (Data)                |
-| MQ5 Gas Sensor (DOUT)   | 5V      | GND     | GPIO 33 (Digital Out)        |
-| LDR 1 (Photoresistor)   | 5V      | GND     | GPIO 34 (DO)                 |
-| KY-026 Flame Sensor     | 5V      | GND     | GPIO 32 (DO)                 |
+| MQ5 Gas Sensor (DOUT)   | 5V      | GND     | GPIO 33 (AO)        |
+| LDR 1 (Photoresistor)   | 5V      | GND     | GPIO 34 (AO)                 |
+| KY-026 Flame Sensor     | 5V      | GND     | GPIO 32 (AO)                 |
 | LCD1602 (I2C)           | 5V      | GND     | GPIO 25 (SDA), GPIO 26 (SCL) |
 | Buzzer (Active)         | —       | GND     | GPIO 27 (Positive terminal)  |
 | ESP32 ↔ Serial Monitor  | —       | —       | TX → RX, RX → TX             |
